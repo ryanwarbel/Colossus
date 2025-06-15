@@ -1,49 +1,51 @@
-// Colossus Core Console v1
-// Frontend (React + Vercel-ready)
-
 import React, { useState } from 'react';
 
-export default function ColossusConsole() {
+export default function Home() {
   const [input, setInput] = useState('');
-  const [history, setHistory] = useState([]);
+  const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleCommand = async () => {
+  const handleExecute = async () => {
     if (!input.trim()) return;
     setLoading(true);
-    const response = await fetch('/api/command', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command: input }),
-    });
-    const data = await response.json();
-    setHistory([...history, { input, output: data.result }]);
-    setInput('');
+    try {
+      const res = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: input }),
+      });
+      const data = await res.json();
+      setOutput(data.result || 'No response.');
+    } catch (err) {
+      setOutput('Error contacting Colossus.');
+    }
     setLoading(false);
   };
 
   return (
-    <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', padding: '2rem' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Colossus Core Console</h1>
-      <div>
-        {history.map((entry, idx) => (
-          <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #444', padding: '1rem' }}>
-            <p><strong>&gt;</strong> {entry.input}</p>
-            <p style={{ color: '#00ff99' }}>{entry.output}</p>
-          </div>
-        ))}
-      </div>
-      <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+    <div style={{ backgroundColor: 'black', color: 'white', height: '100vh', padding: '2rem' }}>
+      <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Colossus Core Console</h1>
+      <div style={{ marginTop: '2rem' }}>
+        <div style={{ background: '#111', padding: '1rem', borderRadius: '5px' }}>
+          <p>&gt; {output || 'Awaiting command...'}</p>
+        </div>
         <input
-          style={{ flexGrow: 1, backgroundColor: '#222', color: '#fff', padding: '0.5rem', borderRadius: '4px' }}
+          style={{ marginTop: '1rem', width: '80%', padding: '0.5rem' }}
+          type="text"
+          placeholder="Enter command..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Enter command..."
         />
         <button
-          onClick={handleCommand}
-          disabled={loading}
-          style={{ padding: '0.5rem 1rem', backgroundColor: '#00ff99', color: '#000', borderRadius: '4px' }}
+          onClick={handleExecute}
+          style={{
+            marginLeft: '1rem',
+            padding: '0.5rem 1rem',
+            backgroundColor: 'limegreen',
+            color: 'black',
+            fontWeight: 'bold',
+            borderRadius: '4px'
+          }}
         >
           {loading ? 'Running...' : 'Execute'}
         </button>
