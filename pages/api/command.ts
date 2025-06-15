@@ -1,5 +1,5 @@
-// pages/api/command.ts
+const nextConfig = {
+  reactStrictMode: true,
+};
 
-export default function handler(req, res) {
-  res.status(200).json({ output: 'The backend is connected and working!' });
-}
+module.exports = nextConfig;
